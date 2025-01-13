@@ -6,7 +6,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-
+use App\Models\Repo;
+use App\Models\User;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -16,10 +17,13 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-
-Route::get('/home', function () {
-    return Inertia::render('Home');
-})->middleware(['auth', 'verified'])->name('home');
+// Prevent / from show error by adding this route
+Route::get("/dashboard", function () {
+    return Inertia::render("Dashboard");
+})->name('dashboard');
+// Route::get('/home', function () {
+//     return Inertia::render('Home');
+// })->middleware(['auth', 'verified'])->name('home');
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Route::get('/new', Inertia::render('New'))->name('new');
@@ -28,18 +32,27 @@ Route::get('/home', function () {
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::post('home', function () {
-        return Inertia::render('Home');
+    // Putting repos so it can handle when user load
+    Route::get('/', function () {
+        return Inertia::render('Home', [
+            'repos' =>
+            Repo::select('name', 'id')
+                ->addSelect([
+                    'user_name' => User::select('name')
+                        ->whereColumn('id', 'repos.user_id')
+                ])
+                ->limit(5)
+                ->get()
+        ]);
     })->name('home');
     // Route::get('home', function() {
     //     return Inertia::render('Home');
     // })->name('home');
-    
+
     Route::get('/new', [RepoController::class, 'createRepo'])->name('new');
     Route::get('/home', [RepoController::class, 'getRepo'])->name('repos');
     // Route::get('/home', [RepoController::class, 'getRepo'])->name('repos');
-    Route::post('/store/repository', [RepoController::class, 'store'])->name('repos');
+    Route::post('/store/repository', [RepoController::class, 'store'])->name('repos.store');
 });
 
 
@@ -49,4 +62,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
