@@ -1,13 +1,14 @@
 <?php
 
+use App\Models\Repo;
+use App\Models\User;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RepoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-use App\Models\Repo;
-use App\Models\User;
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -17,13 +18,10 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
-// Prevent / from show error by adding this route
-Route::get("/dashboard", function () {
-    return Inertia::render("Dashboard");
-})->name('dashboard');
-// Route::get('/home', function () {
-//     return Inertia::render('Home');
-// })->middleware(['auth', 'verified'])->name('home');
+
+Route::get('/home', function () {
+    return Inertia::render('Home');
+})->middleware(['auth', 'verified'])->name('home');
 
 // Route::middleware(['auth', 'verified'])->group(function () {
 //     // Route::get('/new', Inertia::render('New'))->name('new');
@@ -32,7 +30,13 @@ Route::get("/dashboard", function () {
 
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Putting repos so it can handle when user load
+
+    // Route::get('home', function () {
+    //     return Inertia::render('Home');
+    // })->name('home');
+    // Route::get('home', function() {
+    //     return Inertia::render('Home');
+    // })->name('home');
     Route::get('/', function () {
         return Inertia::render('Home', [
             'repos' =>
@@ -45,9 +49,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->get()
         ]);
     })->name('home');
-    // Route::get('home', function() {
-    //     return Inertia::render('Home');
-    // })->name('home');
+    // Route::get('/{repo}/', function ($repo) {
+    //     return Inertia::render('Repo', [
+    //         'info' => Repo::select('name', 'id', 'created_at')
+    //                     ->where('name', $repo)
+    //                     ->first()
+    //     ]);
+    // })->name('repo.show');
+    Route::get('/{repo}/', [RepoController::class, 'repo'])->name('repo.show');
 
     Route::get('/new', [RepoController::class, 'createRepo'])->name('new');
     Route::get('/home', [RepoController::class, 'getRepo'])->name('repos');
