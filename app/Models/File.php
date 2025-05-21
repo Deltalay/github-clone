@@ -8,14 +8,18 @@ class File extends Model
 {
     //
     protected $fillable = [
-        'name', 
+        'name',
         'folder_id',
         'file_size',
         'file_path',
         'repo_id',
+        'file_hash',
+        'metadata',
+        'extension'
+
     ];
 
-    public function folder() 
+    public function folder()
     {
         return $this->belongsTo(Folder::class, 'folder_id');
     }
@@ -25,13 +29,13 @@ class File extends Model
         return $this->belongsTo(Repo::class, 'repo_id');
     }
 
-    // public function commit() 
+    // public function commit()
     // {
     //     return $this->belongsTo(Commit::class, 'commit_id');
     // }
 
-    // public function file() 
+    // public function file()
     // {
-    //     return $this->hasOne(File::class);    
+    //     return $this->hasOne(File::class);
     // }
 }

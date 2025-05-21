@@ -1,10 +1,10 @@
 <template>
     <AuthenticatedLayout :hideDefaultNav="true">
-        
+
         <div class="w-full bg-gray-950 "> <!-- Github Color-> bg-[#0D1117] -->
-            
+
             <RepoNav />
-            
+
             <div class="flex flex-col w-[1280px] mx-auto">
 
                 <div class="h-16 w-full border-b flex justify-between items-center
@@ -21,11 +21,11 @@
                                     border-zinc-700 rounded-xl px-[6px] pb-[2px]">
                             {{ info.visibility }}</div
                         >
-                    
+
                     </div>
 
-                    <ButtonsContainer :total_stars="info.total_stars" 
-                                      :info="info" 
+                    <ButtonsContainer :total_stars="info.total_stars"
+                                      :info="info"
                                       :star="star"
                                       :pin="pin"
                     />
@@ -54,7 +54,7 @@
                             class="w-full h-auto border border-zinc-700 rounded-lg">
                             <!--Total and Lastest Commits  -->
                             <div class="h-[52px] bg-[#151b23] rounded-t-lg">
-                                
+
                             </div>
 
                             <!-- Files and Folders -->
@@ -127,7 +127,7 @@
                         <div class="py-4">
                             <p class="font-semibold ">About</p>
                         </div>
-                        
+                        <p class="text-sm">{{ info.description }}</p>
                     </div>
                 </div>
             </div>

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'nickname'
     ];
 
     /**
@@ -46,7 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function repos() 
+    public function repos()
     {
         return $this->hasMany(Repo::class);
     }

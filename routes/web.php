@@ -37,25 +37,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // HOME PAGE ROUTE
     Route::get('/', [RepoController::class, 'getRepo'])->name('home');
     Route::get('/home', [RepoController::class, 'getRepo'])->name('repos');
-
-    Route::get('/fileTree/{repo}/{folder}/{folder_id}', [RepoController::class, 'getChildren'])->name('folder.children');
-    Route::get('/{user}/{repo}', [RepoController::class, 'repo'])->name('repo.show');
-    Route::get('/{user}/{repo}/{file}', [RepoController::class, 'displayRootFileContent'])->name('repo.filecontent');
-    Route::get('/{user}/{repo}/tree/{path}',[RepoController::class, "folderHandler"])->where('path', '.*')->name("repo.folderhandle");
-    Route::get("/{user}/{repo}/blob/{path}", [RepoController::class, "fileHandler"])->where('path', '.*')->name("repo.filehandler");
-    Route::get('/{user}/{repo}/commits/{path}',[RepoController::class, "commitHandler"])->where('path', '.*')->name("repo.commithandle");
-    Route::get('/{user}/{repo}/commit/{commit}/{path}',[RepoController::class, "commitView"])->where('path', '.*')->name("repo.commit.view");
     Route::get('/new', [RepoController::class, 'createRepo'])->name('new');
-
     Route::post('/store/repository', [RepoController::class, 'store'])->name('repos.store');
-    Route::post('/{user}/{repo}', [CommitController::class, 'store'])->name('files.commit');
-    Route::post('/commited-files', [FileController::class, 'store'])->name('commited.files');
+    Route::get('/fileTree/{repo}/{folder}/{folder_id}', [RepoController::class, 'getChildren'])->name('folder.children');
+    Route::prefix('{user}/{repo}')->where([
+        'user' => '[a-zA-Z0-9_-]+',
+        'repo' => '[a-zA-Z0-9._-]+'
+    ])->group(function () {
+        Route::post('/', [CommitController::class, 'store'])->name('files.commit');
+        Route::get('/', [RepoController::class, 'repo'])->name('repo.show');
+        Route::patch('/star/{star}', [RepoController::class, 'handleStar'])->name('repo.star');
+        Route::patch('/pin', [RepoController::class, 'handlePin'])->name('repo.pin');
+        Route::get('/commit/{commit}/{path}', [RepoController::class, 'commitView'])
+            ->where('path', '.*')->name('repo.commit.view');
+        Route::get('/commits/{path}', [RepoController::class, 'commitHandler'])
+            ->where('path', '.*')->name('repo.commithandle');
+        Route::get('/tree/{path}', [RepoController::class, 'folderHandler'])
+            ->where('path', '.*')->name('repo.folderhandle');
+        Route::get('/blob/{path}', [RepoController::class, 'fileHandler'])
+            ->where('path', '.*')->name('repo.filehandler');
+        Route::get('/{file}', [RepoController::class, 'displayRootFileContent'])->name('repo.filecontent');
+    });
+    // Route::post('/commited-files', [FileController::class, 'store'])->name('commited.files');
+    // Route::get('/{user}/{repo}', [RepoController::class, 'repo'])->name('repo.show');
+    // Route::get('/{user}/{repo}/{file}', [RepoController::class, 'displayRootFileContent'])->name('repo.filecontent');
+    // Route::get('/{user}/{repo}/tree/{path}',[RepoController::class, "folderHandler"])->where('path', '.*')->name("repo.folderhandle");
+    // Route::get("/{user}/{repo}/blob/{path}", [RepoController::class, "fileHandler"])->where('path', '.*')->name("repo.filehandler");
+    // Route::get('/{user}/{repo}/commits/{path}',[RepoController::class, "commitHandler"])->where('path', '.*')->name("repo.commithandle");
+    // Route::get('/{user}/{repo}/commit/{commit}/{path}',[RepoController::class, "commitView"])->where('path', '.*')->name("repo.commit.view");
 
-    
+    // Route::post('/{user}/{repo}', [CommitController::class, 'store'])->name('files.commit');
 
-    // {star} is boolean of user stars or unstars the repo 
-    Route::get('/star/{star}/{user}/{repo}', [RepoController::class, 'handleStar']);
-    Route::get('/pin/{pin}/{user}/{repo}', [RepoController::class, 'handlePin']);
+
+
+    // // {star} is boolean of user stars or unstars the repo
+    // Route::patch('/star/{star}/{user}/{repo}', [RepoController::class, 'handleStar']);
+    // Route::patch('/pin/{user}/{repo}', [RepoController::class, 'handlePin']);
 });
 
 
@@ -65,4 +82,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -16,13 +16,14 @@ class Repo extends Model
     //     'user_id',
     // ];
     protected $fillable = [
-        'name', 
-        'description', 
-        'visibility', 
-        'user_id'
+        'name',
+        'description',
+        'visibility',
+        'user_id',
+        'pin'
     ];
 
-    public function user() 
+    public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
     }

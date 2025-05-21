@@ -83,14 +83,15 @@ class RepoController extends Controller
 
     public function repo($user, $repo)
     {
-        $info = Repo::select('repos.name', 'repos.id', 'repos.created_at', 'repos.visibility', 'repos.total_stars', 'users.name as user_name')
+
+        $info = Repo::select('repos.name', 'repos.id', 'repos.created_at', 'repos.visibility', 'repos.total_stars', 'users.name as user_name', 'repos.description')
             ->join('users', 'repos.user_id', '=', 'users.id')
             ->where('users.name', $user)
             ->where('repos.name', $repo)
             ->first();
 
         $isStarred = Star::where('user_id', Auth::id())->where('repo_id', $info->id)->first();
-        $isPinned = Pin::where('user_id', Auth::id())->where('repo_id', $info->id)->first();
+
 
         if (!$info) return abort(404, 'Repository not found');
         $file = File::where('repo_id',  $info->id)->whereNull('folder_id')->get();
@@ -102,7 +103,7 @@ class RepoController extends Controller
             'files' => $file,
             'folders' => $folder,
             'star' => $isStarred,
-            'pin' => $isPinned,
+            'pin' => $info->pin,
             'repo_owner' => $user // THIS ONE IS DUP, SHOULD BE REMOVED
         ]);
     }
@@ -510,29 +511,33 @@ class RepoController extends Controller
         // ]);
     }
 
-    public function handlePin($pin, $user, $repoId)
+    public function handlePin($user, $repoId)
     {
         $userId = User::select('id')->where('name', $user)->value('id');
-        $text = ""; // FOR DEBUGGING
-        $pinStatus = filter_var($pin, FILTER_VALIDATE_BOOLEAN); // THIS WILL CONVERT TO BOOLEAN
-
-        if ($pinStatus === true) {
-            $pin = new Pin();
-            $pin->user_id = $userId;
-            $pin->repo_id = $repoId;
-            $pin->save();
-
-            $text = "Unpin";
-        } else if ($pinStatus === false) {
-            Pin::where('user_id', $userId)
-                ->where('repo_id', $repoId)
-                ->delete();
-
-            $text = "Pin";
+        if ($userId == null) {
+            return abort(404);
         }
-
+        $text = ""; // FOR DEBUGGING
+        // LET NOT DO THIS
+        // $pinStatus = filter_var($pin, FILTER_VALIDATE_BOOLEAN); // THIS WILL CONVERT TO BOOLEAN
+        $repo = Repo::find($repoId);
+        if ($repo == null) {
+            return abort(404);
+        }
+        if ($repo->user_id !== $userId) {
+            return abort(403);
+        }
+        $pinStatus = $repo->pin;
+        if ($pinStatus === false) {
+            $repo->pin = true;
+            $text = "Pin";
+        } else  {
+            $repo->pin = false;
+            $text = "Unpin";
+        }
+        $repo->save();
         return response()->json([
-            "userId" => $repoId,
+            "userId" => $userId,
             "repoId" => $repoId,
             "pinStatus" => $text
         ]);

@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('commit_id')->constrained('commits');
             $table->foreignId('file_id')->constrained('files');
-            $table->foreignId('content_id')->constrained('contents');
             $table->timestamps();
         });
     }

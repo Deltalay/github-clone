@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->enum('visibility', ['public', 'private'])->default('public');
             $table->integer('total_stars')->default(0);
+            $table->boolean('pin')->default(false);
             $table->timestamps();
         });
     }

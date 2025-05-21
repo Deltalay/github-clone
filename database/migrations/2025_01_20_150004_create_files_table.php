@@ -15,9 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('folder_id')->nullable()->constrained('folders')->onDelete('cascade');
-            $table->foreignId('repo_id')->nullable()->constrained('repos')->onDelete('cascade');    
+            $table->foreignId('repo_id')->nullable()->constrained('repos')->onDelete('cascade');
             $table->integer('file_size');
             $table->string('file_path');
+            $table->string('file_hash');
+            $table->string('metadata');
+            $table->string("extension")->nullable()->default(null);
             $table->timestamps();
         });
     }
