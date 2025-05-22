@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,11 +32,18 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|regex:/^\S*$/u|unique:'.User::class,
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.regex' => 'Username cannot contain spaces, tabs, or line breaks.',
+            'name.unique' => 'This username is already in use. CHANGE IT!!!.',
         ]);
-
+        // CHECK IF USERNAME HAS IT FOLDER YET
+        if (Storage::exists($request->name)) {
+            return abort(409, 'Username already exist!!!! Change it!!!');
+        }
+        Storage::makeDirectory($request->name);
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
