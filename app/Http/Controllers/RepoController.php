@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 use function Laravel\Prompts\search;
 
@@ -56,7 +57,7 @@ class RepoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:repos,name',
+            'name' => 'required|string|max:255|regex:/^\S*$/u|unique:repos,name',
             'description' => 'nullable|string',
             'visibility' => 'required|in:Public,Private',
         ]);
@@ -68,13 +69,17 @@ class RepoController extends Controller
         if (str_contains($repo_name, " ")) {
             $repo_name = str_replace(' ', '_', $repo_name);
         }
+        $username = $request->user()->name;
+        if (Storage::exists("$username/".$repo_name)) {
+            return abort(409, "It look like this repo already exist or at least it show in our database.");
+        }
+        Storage::makeDirectory($username."/".$repo_name);
         $repo = new Repo();
         $repo->name = $repo_name;
         $repo->description = $request->input('description');
         $repo->visibility = strtolower($request->input('visibility'));
         $repo->user_id = Auth::id();
         $repo->save();
-        $username = $request->user()->name;
 
         return redirect(
             "/$username/$repo_name"
